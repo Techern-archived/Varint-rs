@@ -1,0 +1,11 @@
+[package]
+name = "varint"
+version = "0.0.0"
+authors = ["Cruz Julian Bishop <cruzjbishop@gmail.com>"]
+description = "A Rust implementation of Google Protobuf's Variable-Length Integers"
+
+repository = "https://github.com/Techern/Varint-rs"
+documentation = "http://techern.github.io/Varint-rs"
+readme = "README.md"
+keywords = ["Minecraft", "Server"]
+license = "MIT"
