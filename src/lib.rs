@@ -6,12 +6,10 @@ pub const VARINT_32_MAX_BYTES: u8 = 5;
 /// The maximum number of bytes used by a 32-bit Varint
 pub const VARINT_64_MAX_BYTES: u8 = 10;
 
-///Checks to see if the most signifigant bit exists in the specified byte
+/// Checks to see if the most signifigant bit exists in the specified byte
 pub fn most_signifigant_bit_exists(input: u8) -> bool {
     input & 0b10000000 != 0
 }
-
-
 
 #[cfg(test)]
 mod test {

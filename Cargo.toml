@@ -9,3 +9,6 @@ documentation = "http://techern.github.io/Varint-rs"
 readme = "README.md"
 keywords = ["Minecraft", "Server"]
 license = "MIT"
+
+[dependencies]
+byteorder = "0.3.11"
