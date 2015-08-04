@@ -11,10 +11,37 @@ pub fn most_signifigant_bit_exists(input: u8) -> bool {
     input & 0b10000000 != 0
 }
 
+/// A struct defining a variable-length integer
+#[derive(Clone, Debug)]
+pub struct Varint {
+
+    /// The internal data representation
+    pub data: Vec<u8>
+
+}
+
+impl Varint {
+
+    /// Gets the number of bytes currently contained by this Varint
+    pub fn number_of_bytes(&self) -> usize {
+        self.data.len()
+    }
+
+}
+
 #[cfg(test)]
 mod test {
 
     use super::*;
+    
+    #[test]
+    fn test_new_varint_has_no_bytes() {
+        
+        let abc: Varint = Varint { data: Vec::new() };
+        
+        assert_eq!(0, abc.number_of_bytes());
+        
+    }
     
     #[test]
     fn test_most_signifigant_bit() {
