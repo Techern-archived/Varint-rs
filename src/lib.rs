@@ -29,15 +29,97 @@ impl Varint {
 
 }
 
+/// Gets the number of bytes required to store an unsigned value in a Varint
+pub fn unsigned_varint_bytes_required(input: usize) -> u8 {
+
+    let mut value: u64 = input as u64;
+    
+    let mut returnable: u8 = 0;
+    
+    if value == 0 {
+        return 1;
+    }
+    
+    while value >= 1 {
+        
+        value >>= 7;
+                
+        returnable += 1;
+    }
+    
+    returnable
+
+}
+    
+///Encodes an unsigned value as a Varint.
+pub fn encode_unsigned_varint(input: usize) -> Varint {
+
+    let mut returnable: Varint = Varint { data: Vec::<u8>::new() };
+    
+    let mut value: u64 = input as u64;
+    
+    if value == 0 {
+        returnable.data.push(0);
+        return returnable;
+    } else {
+        
+        while value >= 1 {
+            let mut next_byte: u8 = (value & 0b01111111) as u8;
+            
+            value >>= 7;
+            
+            if value >= 1 {
+                next_byte |= 0b10000000;
+            }
+        
+            returnable.data.push(next_byte);
+        }
+        
+        return returnable;
+    }
+
+}
+
 #[cfg(test)]
 mod test {
 
     use super::*;
     
     #[test]
+    fn test_varint_bytes_required() {
+        let mut abc: usize = 0;
+        
+        assert_eq!(1, unsigned_varint_bytes_required(abc));
+        
+        abc = 120;
+        
+        assert_eq!(1, unsigned_varint_bytes_required(abc));
+        
+        abc = 128;
+        
+        assert_eq!(2, unsigned_varint_bytes_required(abc));
+        
+        abc = 300;
+        
+        assert_eq!(2, unsigned_varint_bytes_required(abc));
+        
+        abc = 0b000111111101010110101100;
+        
+        assert_eq!(3, unsigned_varint_bytes_required(abc));
+        
+        abc = 0b011111111101010110101100;
+        
+        assert_eq!(4, unsigned_varint_bytes_required(abc));
+        
+        abc = 4147110142;
+        
+        assert_eq!(5, unsigned_varint_bytes_required(abc));
+    }
+    
+    #[test]
     fn test_new_varint_has_no_bytes() {
         
-        let abc: Varint = Varint { data: Vec::new() };
+        let abc: Varint = Varint { data: Vec::<u8>::new() };
         
         assert_eq!(0, abc.number_of_bytes());
         
