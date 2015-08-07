@@ -3,10 +3,10 @@
 use std::collections::VecDeque;
 
 /// The maximum number of bytes used by a 32-bit Varint
-pub const VARINT_32_MAX_BYTES: u8 = 5;
+pub const VARINT_32_MAX_BYTES: usize = 5;
 
 /// The maximum number of bytes used by a 32-bit Varint
-pub const VARINT_64_MAX_BYTES: u8 = 10;
+pub const VARINT_64_MAX_BYTES: usize = 10;
 
 /// Checks to see if the most signifigant bit exists in the specified byte
 pub fn most_signifigant_bit_exists(input: u8) -> bool {
@@ -117,6 +117,84 @@ pub fn encode_unsigned_varint64(input: u64) -> Varint {
         return returnable;
     }
 
+}
+
+/// Decodes an unsigned varint32, returning a result of either a u32 or a string explaining the error
+pub fn decode_unsigned_varint32(input: &mut Varint) -> Result<u32, &'static str> {
+    if input.number_of_bytes() == 0 {
+        return Err("Varint somehow has zero bytes! Are you decoding something you wrote?");
+    } else if input.number_of_bytes() > VARINT_32_MAX_BYTES {
+        return Err("Varint is larger than VARINT_32_MAX_BYTES");
+    } else if input.number_of_bytes() == 1 {
+        let returnable = input.data.pop_front();
+        
+        if returnable.is_none() {
+            return Err("Only byte contained in a VecDeque is a byte but is also None. You might want to run memtest");
+        } else {
+            return Ok(returnable.unwrap() as u32);
+        }
+    } else {
+        let mut shift_amount: u32 = 0;
+        let mut decoded_value: u32 = 0;
+        while input.number_of_bytes() >= 1 {
+            let byte_result = input.data.pop_front();
+            
+            if byte_result.is_none() {
+                return Err("Byte contained in a VecDeque is a byte that is also None. Run memtest, please");
+            } else {
+                let byte_value = byte_result.unwrap();
+                
+                decoded_value |= ((byte_value & 0b01111111) as u32) << shift_amount; //<< 0 for first byte
+                
+                if (decoded_value & 0b10000000) == 0 {
+                    return Ok(decoded_value);
+                } else {
+                    shift_amount += 7;
+                }
+            }
+        }
+        
+        Err("No bytes were marked as the end byte. Check your numbers or run a memtest")
+    }
+}
+
+/// Decodes an unsigned varint64, returning a result of either a u64 or a string explaining the error
+pub fn decode_unsigned_varint64(input: &mut Varint) -> Result<u64, &'static str> {
+    if input.number_of_bytes() == 0 {
+        return Err("Varint somehow has zero bytes! Are you decoding something you wrote?");
+    } else if input.number_of_bytes() > VARINT_64_MAX_BYTES {
+        return Err("Varint is larger than VARINT_64_MAX_BYTES");
+    } else if input.number_of_bytes() == 1 {
+        let returnable = input.data.pop_front();
+        
+        if returnable.is_none() {
+            return Err("Only byte contained in a VecDeque is a byte but is also None. You might want to run memtest");
+        } else {
+            return Ok(returnable.unwrap() as u64);
+        }
+    } else {
+        let mut shift_amount: u64 = 0;
+        let mut decoded_value: u64 = 0;
+        while input.number_of_bytes() >= 1 {
+            let byte_result = input.data.pop_front();
+            
+            if byte_result.is_none() {
+                return Err("Byte contained in a VecDeque is a byte that is also None. Run memtest, please");
+            } else {
+                let byte_value = byte_result.unwrap();
+                
+                decoded_value |= ((byte_value & 0b01111111) as u64) << shift_amount; //<< 0 for first byte
+                
+                if (decoded_value & 0b10000000) == 0 {
+                    return Ok(decoded_value);
+                } else {
+                    shift_amount += 7;
+                }
+            }
+        }
+        
+        Err("No bytes were marked as the end byte. Check your numbers or run a memtest")
+    }
 }
 
 #[cfg(test)]
