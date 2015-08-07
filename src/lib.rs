@@ -61,7 +61,7 @@ pub fn encode_signed_varint64(input: i64) -> Varint {
     encode_unsigned_varint64(zigzag_signed_long(input))
 }
     
-/// Encodes an unsigned u32 as a Varint.
+/// Encodes an unsigned u32 as a Varint, returning the Varint.
 pub fn encode_unsigned_varint32(input: u32) -> Varint {
 
     let mut returnable: Varint = Varint { data: VecDeque::<u8>::new() };
@@ -73,28 +73,26 @@ pub fn encode_unsigned_varint32(input: u32) -> Varint {
         return returnable;
     } else {
         
-        while value >= 1 {
-            let mut next_byte: u8 = (value & 0b01111111) as u8;
+        while value >= 0b10000000 {
+            let next_byte: u8 = ((value & 0b01111111) as u8) | 0b10000000;
             
-            value >>= 7;
-            
-            if value >= 1 {
-                next_byte |= 0b10000000;
-            }
-        
+            value = value >> 7;
+                    
             returnable.data.push_back(next_byte);
         }
+        
+        returnable.data.push_back((value & 0b01111111) as u8);
         
         return returnable;
     }
 
 }
-    
-/// Encodes an unsigned u64 as a Varint.
+
+/// Encodes an unsigned u64 as a Varint, returning the Varint
 pub fn encode_unsigned_varint64(input: u64) -> Varint {
 
     let mut returnable: Varint = Varint { data: VecDeque::<u8>::new() };
-    
+        
     let mut value: u64 = input;
     
     if value == 0 {
@@ -102,17 +100,15 @@ pub fn encode_unsigned_varint64(input: u64) -> Varint {
         return returnable;
     } else {
         
-        while value >= 1 {
-            let mut next_byte: u8 = (value & 0b01111111) as u8;
+        while value >= 0b10000000 {
+            let next_byte: u8 = ((value & 0b01111111) as u8) | 0b10000000;
             
-            value >>= 7;
-            
-            if value >= 1 {
-                next_byte |= 0b10000000;
-            }
-        
+            value = value >> 7;
+                    
             returnable.data.push_back(next_byte);
         }
+        
+        returnable.data.push_back((value & 0b01111111) as u8);
         
         return returnable;
     }
@@ -120,7 +116,10 @@ pub fn encode_unsigned_varint64(input: u64) -> Varint {
 }
 
 /// Decodes an unsigned varint32, returning a result of either a u32 or a string explaining the error
-pub fn decode_unsigned_varint32(input: &mut Varint) -> Result<u32, &'static str> {
+pub fn decode_unsigned_varint32(original_input: &Varint) -> Result<u32, &'static str> {
+
+    let mut input = original_input.clone();
+    
     if input.number_of_bytes() == 0 {
         return Err("Varint somehow has zero bytes! Are you decoding something you wrote?");
     } else if input.number_of_bytes() > VARINT_32_MAX_BYTES {
@@ -146,7 +145,7 @@ pub fn decode_unsigned_varint32(input: &mut Varint) -> Result<u32, &'static str>
                 
                 decoded_value |= ((byte_value & 0b01111111) as u32) << shift_amount; //<< 0 for first byte
                 
-                if (decoded_value & 0b10000000) == 0 {
+                if (byte_value & 0b10000000) == 0 {
                     return Ok(decoded_value);
                 } else {
                     shift_amount += 7;
@@ -159,7 +158,10 @@ pub fn decode_unsigned_varint32(input: &mut Varint) -> Result<u32, &'static str>
 }
 
 /// Decodes an unsigned varint64, returning a result of either a u64 or a string explaining the error
-pub fn decode_unsigned_varint64(input: &mut Varint) -> Result<u64, &'static str> {
+pub fn decode_unsigned_varint64(original_input: &Varint) -> Result<u64, &'static str> {
+
+    let mut input = original_input.clone();
+
     if input.number_of_bytes() == 0 {
         return Err("Varint somehow has zero bytes! Are you decoding something you wrote?");
     } else if input.number_of_bytes() > VARINT_64_MAX_BYTES {
@@ -185,7 +187,7 @@ pub fn decode_unsigned_varint64(input: &mut Varint) -> Result<u64, &'static str>
                 
                 decoded_value |= ((byte_value & 0b01111111) as u64) << shift_amount; //<< 0 for first byte
                 
-                if (decoded_value & 0b10000000) == 0 {
+                if (byte_value & 0b10000000) == 0 {
                     return Ok(decoded_value);
                 } else {
                     shift_amount += 7;
@@ -203,6 +205,153 @@ mod test {
     use super::*;
     
     use std::collections::VecDeque;
+    
+    #[test]
+    fn test_endecoding_zero() {
+        let value = 0;
+        
+        assert_eq!(value, value); //Congratulations. You've sucessfully switched to a parallel universe where 0 is actually 1
+        
+        let encoded: Varint = encode_unsigned_varint32(value);
+        
+        assert_eq!(1, encoded.number_of_bytes());
+        
+        let result = decode_unsigned_varint32(&encoded);
+        
+        if result.is_ok() {
+            let result = result.unwrap();
+            
+            assert_eq!(value, result);
+        } else {
+            assert_eq!(0, 1); //You're still in that alternate universe, bro
+        }
+    }
+    
+    #[test]
+    fn test_endecoding_one() {
+        let value = 1;
+        
+        assert_eq!(value, value); //Congratulations. You've sucessfully switched to a parallel universe where 0 is actually 1
+        
+        let encoded: Varint = encode_unsigned_varint32(value);
+        
+        assert_eq!(1, encoded.number_of_bytes());
+        
+        let result = decode_unsigned_varint32(&encoded);
+        
+        if result.is_ok() {
+            let result = result.unwrap();
+            
+            assert_eq!(value, result);
+        } else {
+            assert_eq!(0, 1); //You're still in that alternate universe, bro
+        }
+    }
+    
+    #[test]
+    fn test_endecoding_trillion() {
+        let value = 1_000_000_000_000;
+        
+        assert_eq!(value, value); //Congratulations. You've sucessfully switched to a parallel universe where 0 is actually 1
+        
+        let encoded: Varint = encode_unsigned_varint64(value);
+        
+        assert_eq!(6, encoded.number_of_bytes());
+        
+        let result = decode_unsigned_varint64(&encoded);
+        
+        if result.is_ok() {
+            let result = result.unwrap();
+            
+            assert_eq!(value, result);
+        } else {
+            assert_eq!(0, 1); //You're still in that alternate universe, bro
+        }
+    }
+    
+    #[test]
+    fn test_endecoding_minus_one() {
+        let value = -1;
+        
+        assert_eq!(value, value); //Congratulations. You've sucessfully switched to a parallel universe where 0 is actually 1
+        
+        let encoded: Varint = encode_signed_varint32(value);
+        
+        assert_eq!(1, encoded.number_of_bytes());
+        
+        let result = decode_unsigned_varint32(&encoded);
+        
+        if result.is_ok() {
+            let result = result.unwrap();
+            
+            assert_eq!(value, zigzag_unsigned_int(result));
+        } else {
+            assert_eq!(0, 1); //You're still in that alternate universe, bro
+        }
+    }
+    
+    #[test]
+    fn test_endecoding_minus_one_fifty() {
+        let value = -150;
+        
+        assert_eq!(value, value); //Congratulations. You've sucessfully switched to a parallel universe where 0 is actually 1
+        
+        let encoded: Varint = encode_signed_varint32(value);
+        
+        assert_eq!(2, encoded.number_of_bytes());
+        
+        let result = decode_unsigned_varint32(&encoded);
+        
+        if result.is_ok() {
+            let result = result.unwrap();
+            
+            assert_eq!(value, zigzag_unsigned_int(result));
+        } else {
+            assert_eq!(0, 1); //You're still in that alternate universe, bro
+        }
+    }
+    
+    #[test]
+    fn test_endecoding_minus_three_hundred() {
+        let value = -300;
+        
+        assert_eq!(value, value); //Congratulations. You've sucessfully switched to a parallel universe where 0 is actually 1
+        
+        let encoded: Varint = encode_signed_varint32(value);
+        
+        assert_eq!(2, encoded.number_of_bytes());
+        
+        let result = decode_unsigned_varint32(&encoded);
+        
+        if result.is_ok() {
+            let result = result.unwrap();
+            
+            assert_eq!(value, zigzag_unsigned_int(result));
+        } else {
+            assert_eq!(0, 1); //You're still in that alternate universe, bro
+        }
+    }
+    
+    #[test]
+    fn test_endecoding_minus_one_hundred_trillion() {
+        let value = -100_000_000_000_000;
+        
+        assert_eq!(value, value); //Congratulations. You've sucessfully switched to a parallel universe where 0 is actually 1
+        
+        let encoded: Varint = encode_signed_varint64(value);
+                
+        assert_eq!(7, encoded.number_of_bytes());
+        
+        let result = decode_unsigned_varint64(&encoded);
+        
+        if result.is_ok() {
+            let result = result.unwrap();
+            
+            assert_eq!(value, zigzag_unsigned_long(result));
+        } else {
+            assert_eq!(0, 1); //You're still in that alternate universe, bro
+        }
+    }
     
     #[test]
     fn test_zigzag_unsigned_value() {
