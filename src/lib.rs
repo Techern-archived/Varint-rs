@@ -1,5 +1,7 @@
 //! An implementation of Google Protobuf's Variable-Length Integers
 
+use std::collections::VecDeque;
+
 /// The maximum number of bytes used by a 32-bit Varint
 pub const VARINT_32_MAX_BYTES: u8 = 5;
 
@@ -16,7 +18,7 @@ pub fn most_signifigant_bit_exists(input: u8) -> bool {
 pub struct Varint {
 
     /// The internal data representation
-    pub data: Vec<u8>
+    pub data: VecDeque<u8>
 
 }
 
@@ -62,12 +64,12 @@ pub fn encode_signed_varint64(input: i64) -> Varint {
 /// Encodes an unsigned u32 as a Varint.
 pub fn encode_unsigned_varint32(input: u32) -> Varint {
 
-    let mut returnable: Varint = Varint { data: Vec::<u8>::new() };
+    let mut returnable: Varint = Varint { data: VecDeque::<u8>::new() };
     
     let mut value: u32 = input;
     
     if value == 0 {
-        returnable.data.push(0);
+        returnable.data.push_back(0);
         return returnable;
     } else {
         
@@ -80,7 +82,7 @@ pub fn encode_unsigned_varint32(input: u32) -> Varint {
                 next_byte |= 0b10000000;
             }
         
-            returnable.data.push(next_byte);
+            returnable.data.push_back(next_byte);
         }
         
         return returnable;
@@ -91,12 +93,12 @@ pub fn encode_unsigned_varint32(input: u32) -> Varint {
 /// Encodes an unsigned u64 as a Varint.
 pub fn encode_unsigned_varint64(input: u64) -> Varint {
 
-    let mut returnable: Varint = Varint { data: Vec::<u8>::new() };
+    let mut returnable: Varint = Varint { data: VecDeque::<u8>::new() };
     
     let mut value: u64 = input;
     
     if value == 0 {
-        returnable.data.push(0);
+        returnable.data.push_back(0);
         return returnable;
     } else {
         
@@ -109,7 +111,7 @@ pub fn encode_unsigned_varint64(input: u64) -> Varint {
                 next_byte |= 0b10000000;
             }
         
-            returnable.data.push(next_byte);
+            returnable.data.push_back(next_byte);
         }
         
         return returnable;
@@ -121,6 +123,8 @@ pub fn encode_unsigned_varint64(input: u64) -> Varint {
 mod test {
 
     use super::*;
+    
+    use std::collections::VecDeque;
     
     #[test]
     fn test_zigzag_signed_value() {
@@ -152,7 +156,7 @@ mod test {
     #[test]
     fn test_new_varint_has_no_bytes() {
         
-        let abc: Varint = Varint { data: Vec::<u8>::new() };
+        let abc: Varint = Varint { data: VecDeque::<u8>::new() };
         
         assert_eq!(0, abc.number_of_bytes());
         
