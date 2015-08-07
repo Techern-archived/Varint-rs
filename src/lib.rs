@@ -29,34 +29,71 @@ impl Varint {
 
 }
 
-/// Gets the number of bytes required to store an unsigned value in a Varint
-pub fn unsigned_varint_bytes_required(input: usize) -> u8 {
+/// Transforms a signed int to an unsigned int via zig-zag transformation
+pub fn zigzag_signed_int(input: i32) -> u32 {
+    ((input << 1) ^ (input >> 31)) as u32
+}
 
-    let mut value: u64 = input as u64;
-    
-    let mut returnable: u8 = 0;
-    
-    if value == 0 {
-        return 1;
-    }
-    
-    while value >= 1 {
-        
-        value >>= 7;
-                
-        returnable += 1;
-    }
-    
-    returnable
+/// Transforms a signed long to an unsigned long via zig-zag transformation
+pub fn zigzag_signed_long(input: i64) -> u64 {
+    ((input << 1) ^ (input >> 63)) as u64
+}
 
+/// Transforms an unsigned int to a signed int via zig-zag transformation
+pub fn zigzag_unsigned_int(input: u32) -> i32 {
+    ((input >> 1) as i32) ^ (-((input & 1) as i32))
+}
+
+/// Transforms an unsignigned long to a signed long via zig-zag transformation
+pub fn zigzag_unsigned_long(input: u64) -> i64 {
+    ((input >> 1) as i64) ^ (-((input & 1) as i64))
+}
+
+/// Encodes a signed i32 as a Varint
+pub fn encode_signed_varint32(input: i32) -> Varint {
+    encode_unsigned_varint32(zigzag_signed_int(input))
+}
+
+/// Encodes a signed i64 as a Varint
+pub fn encode_signed_varint64(input: i64) -> Varint {
+    encode_unsigned_varint64(zigzag_signed_long(input))
 }
     
-///Encodes an unsigned value as a Varint.
-pub fn encode_unsigned_varint(input: usize) -> Varint {
+/// Encodes an unsigned u32 as a Varint.
+pub fn encode_unsigned_varint32(input: u32) -> Varint {
 
     let mut returnable: Varint = Varint { data: Vec::<u8>::new() };
     
-    let mut value: u64 = input as u64;
+    let mut value: u32 = input;
+    
+    if value == 0 {
+        returnable.data.push(0);
+        return returnable;
+    } else {
+        
+        while value >= 1 {
+            let mut next_byte: u8 = (value & 0b01111111) as u8;
+            
+            value >>= 7;
+            
+            if value >= 1 {
+                next_byte |= 0b10000000;
+            }
+        
+            returnable.data.push(next_byte);
+        }
+        
+        return returnable;
+    }
+
+}
+    
+/// Encodes an unsigned u64 as a Varint.
+pub fn encode_unsigned_varint64(input: u64) -> Varint {
+
+    let mut returnable: Varint = Varint { data: Vec::<u8>::new() };
+    
+    let mut value: u64 = input;
     
     if value == 0 {
         returnable.data.push(0);
@@ -86,34 +123,30 @@ mod test {
     use super::*;
     
     #[test]
-    fn test_varint_bytes_required() {
-        let mut abc: usize = 0;
+    fn test_zigzag_signed_value() {
+        let mut signed: i32 = 0;
         
-        assert_eq!(1, unsigned_varint_bytes_required(abc));
+        assert_eq!(signed, zigzag_signed_int(signed) as i32);
         
-        abc = 120;
+        signed = -1;
         
-        assert_eq!(1, unsigned_varint_bytes_required(abc));
+        assert_eq!(1, zigzag_signed_int(signed));
         
-        abc = 128;
+        signed = 1;
         
-        assert_eq!(2, unsigned_varint_bytes_required(abc));
+        assert_eq!(2, zigzag_signed_int(signed));
         
-        abc = 300;
+        signed = -2;
         
-        assert_eq!(2, unsigned_varint_bytes_required(abc));
+        assert_eq!(3, zigzag_signed_int(signed));
         
-        abc = 0b000111111101010110101100;
+        let mut signed: i64 = 9223372036854775806;
         
-        assert_eq!(3, unsigned_varint_bytes_required(abc));
+        assert_eq!(18446744073709551612, zigzag_signed_long(signed));
         
-        abc = 0b011111111101010110101100;
+        signed = -9223372036854775808;
         
-        assert_eq!(4, unsigned_varint_bytes_required(abc));
-        
-        abc = 4147110142;
-        
-        assert_eq!(5, unsigned_varint_bytes_required(abc));
+        assert_eq!(18446744073709551615, zigzag_signed_long(signed));
     }
     
     #[test]
