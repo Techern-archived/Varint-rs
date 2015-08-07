@@ -205,6 +205,25 @@ mod test {
     use std::collections::VecDeque;
     
     #[test]
+    fn test_zigzag_unsigned_value() {
+        let mut unsigned: u32 = 0;
+        
+        assert_eq!(unsigned, zigzag_unsigned_int(unsigned) as u32);
+        
+        unsigned = 1;
+        
+        assert_eq!(-1, zigzag_unsigned_int(unsigned));
+        
+        unsigned = 2;
+        
+        assert_eq!(1, zigzag_unsigned_int(unsigned));
+        
+        let unsigned: u64 = 18446744073709551612;
+        
+        assert_eq!(9223372036854775806, zigzag_unsigned_long(unsigned));
+    }
+    
+    #[test]
     fn test_zigzag_signed_value() {
         let mut signed: i32 = 0;
         
