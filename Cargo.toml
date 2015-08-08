@@ -9,3 +9,6 @@ documentation = "http://techern.github.io/Varint-rs"
 readme = "README.md"
 keywords = ["Protobuf", "Google", "Varint"]
 license = "MIT"
+
+[dependencies]
+bit_utils = "0.1.0"
