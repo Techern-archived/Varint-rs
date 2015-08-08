@@ -2,16 +2,15 @@
 
 use std::collections::VecDeque;
 
+extern crate bit_utils;
+
+use bit_utils::BitInformation;
+
 /// The maximum number of bytes used by a 32-bit Varint
 pub const VARINT_32_MAX_BYTES: usize = 5;
 
 /// The maximum number of bytes used by a 32-bit Varint
 pub const VARINT_64_MAX_BYTES: usize = 10;
-
-/// Checks to see if the most signifigant bit exists in the specified byte
-pub fn most_signifigant_bit_exists(input: u8) -> bool {
-    input & 0b10000000 != 0
-}
 
 /// A struct defining a variable-length integer
 #[derive(Clone, Debug)]
@@ -141,11 +140,11 @@ pub fn decode_unsigned_varint32(original_input: &Varint) -> Result<u32, &'static
             if byte_result.is_none() {
                 return Err("Byte contained in a VecDeque is a byte that is also None. Run memtest, please");
             } else {
-                let byte_value = byte_result.unwrap();
+                let byte_value: u8 = byte_result.unwrap();
                 
                 decoded_value |= ((byte_value & 0b01111111) as u32) << shift_amount; //<< 0 for first byte
                 
-                if (byte_value & 0b10000000) == 0 {
+                if byte_value.has_most_signifigant_bit() == false {
                     return Ok(decoded_value);
                 } else {
                     shift_amount += 7;
@@ -183,11 +182,11 @@ pub fn decode_unsigned_varint64(original_input: &Varint) -> Result<u64, &'static
             if byte_result.is_none() {
                 return Err("Byte contained in a VecDeque is a byte that is also None. Run memtest, please");
             } else {
-                let byte_value = byte_result.unwrap();
+                let byte_value: u8 = byte_result.unwrap();
                 
                 decoded_value |= ((byte_value & 0b01111111) as u64) << shift_amount; //<< 0 for first byte
                 
-                if (byte_value & 0b10000000) == 0 {
+                if byte_value.has_most_signifigant_bit() == false {
                     return Ok(decoded_value);
                 } else {
                     shift_amount += 7;
@@ -205,6 +204,10 @@ mod test {
     use super::*;
     
     use std::collections::VecDeque;
+    
+    extern crate bit_utils;
+    
+    use bit_utils::BitInformation;
     
     #[test]
     fn test_endecoding_zero() {
@@ -412,19 +415,19 @@ mod test {
     fn test_most_signifigant_bit() {
         let mut value: u8 = 1;
         
-        assert!(most_signifigant_bit_exists(value) == false);
+        assert!(value.has_most_signifigant_bit() == false);
         
         value = 120;
         
-        assert!(most_signifigant_bit_exists(value) == false);
+        assert!(value.has_most_signifigant_bit() == false);
         
         value = 128;
         
-        assert!(most_signifigant_bit_exists(value) == true);
+        assert!(value.has_most_signifigant_bit() == true);
         
         value = 129;
         
-        assert!(most_signifigant_bit_exists(value) == true);
+        assert!(value.has_most_signifigant_bit() == true);
     }
     
 }
