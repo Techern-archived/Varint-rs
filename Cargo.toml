@@ -1,6 +1,6 @@
 [package]
 name = "varint"
-version = "0.2.0"
+version = "0.9.0-dev"
 authors = ["Cruz Julian Bishop <cruzjbishop@gmail.com>"]
 description = "A Rust implementation of Google Protobuf's Variable-Length Integers"
 
