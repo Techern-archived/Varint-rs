@@ -21,6 +21,7 @@ script:
   travis-cargo --only stable doc
 after_success:
 - travis-cargo --only stable doc-upload
+- travis-cargo coveralls --no-sudo
 env:
   global:
   - matrix:
