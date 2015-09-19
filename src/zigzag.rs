@@ -79,3 +79,122 @@ impl ZigZag<i64> for u64 {
     }
 
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::ZigZag;
+
+    #[test]
+    fn test_u8_i8_zigzag() {
+        let mut unsigned: u8 = 0u8;
+
+        assert_eq!(0i8, unsigned.zigzag());
+
+        unsigned = 1;
+
+        assert_eq!(-1i8, unsigned.zigzag());
+
+        unsigned = 2;
+
+        assert_eq!(1i8, unsigned.zigzag());
+
+        let mut signed: i8 = 0i8;
+
+        assert_eq!(0u8, signed.zigzag());
+
+        signed = -1i8;
+
+        assert_eq!(1u8, signed.zigzag());
+
+        signed = 1i8;
+
+        assert_eq!(2u8, signed.zigzag());
+
+    }
+
+    #[test]
+    fn test_u16_i16_zigzag() {
+        let mut unsigned: u16 = 0u16;
+
+        assert_eq!(0i16, unsigned.zigzag());
+
+        unsigned = 1;
+
+        assert_eq!(-1i16, unsigned.zigzag());
+
+        unsigned = 2;
+
+        assert_eq!(1i16, unsigned.zigzag());
+
+        let mut signed: i16 = 0i16;
+
+        assert_eq!(0u16, signed.zigzag());
+
+        signed = -1i16;
+
+        assert_eq!(1u16, signed.zigzag());
+
+        signed = 1i16;
+
+        assert_eq!(2u16, signed.zigzag());
+
+    }
+
+    #[test]
+    fn test_u32_i32_zigzag() {
+        let mut unsigned: u32 = 0u32;
+
+        assert_eq!(0i32, unsigned.zigzag());
+
+        unsigned = 1;
+
+        assert_eq!(-1i32, unsigned.zigzag());
+
+        unsigned = 2;
+
+        assert_eq!(1i32, unsigned.zigzag());
+
+        let mut signed: i32 = 0i32;
+
+        assert_eq!(0u32, signed.zigzag());
+
+        signed = -1i32;
+
+        assert_eq!(1u32, signed.zigzag());
+
+        signed = 1i32;
+
+        assert_eq!(2u32, signed.zigzag());
+
+    }
+
+    #[test]
+    fn test_u64_i64_zigzag() {
+        let mut unsigned: u64 = 0u64;
+
+        assert_eq!(0i64, unsigned.zigzag());
+
+        unsigned = 1;
+
+        assert_eq!(-1i64, unsigned.zigzag());
+
+        unsigned = 2;
+
+        assert_eq!(1i64, unsigned.zigzag());
+
+        let mut signed: i64 = 0i64;
+
+        assert_eq!(0u64, signed.zigzag());
+
+        signed = -1i64;
+
+        assert_eq!(1u64, signed.zigzag());
+
+        signed = 1i64;
+
+        assert_eq!(2u64, signed.zigzag());
+
+    }
+
+}
