@@ -6,7 +6,7 @@
 
 mod zigzag;
 
-pub use zigzag::{ zigzag_unsigned_int, zigzag_unsigned_long, zigzag_signed_int, zigzag_signed_long };
+pub use zigzag::ZigZag;
 
 /// The maximum number of bytes used by a 32-bit Varint
 pub const VARINT_32_MAX_BYTES: usize = 5;
