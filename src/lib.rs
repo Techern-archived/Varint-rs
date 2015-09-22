@@ -1,5 +1,7 @@
 //! An implementation of Google Protobuf's Variable-Length Integers
 
+#![cfg_attr(feature = "nightly", feature(test))]
+
 //extern crate bit_utils;
 
 //use bit_utils::BitInformation;

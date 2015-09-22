@@ -198,3 +198,54 @@ mod tests {
     }
 
 }
+
+#[cfg(feature = "nightly")]
+#[cfg(test)]
+mod benchmarks {
+
+    use super::ZigZag;
+
+    extern crate test;
+    use self::test::Bencher;
+
+    #[bench]
+    fn bench_i8_zigzag(b: &mut Bencher) {
+        b.iter(|| (-15i8).zigzag())
+    }
+
+    #[bench]
+    fn bench_u8_zigzag(b: &mut Bencher) {
+        b.iter(|| 224u8.zigzag())
+    }
+
+    #[bench]
+    fn bench_i16_zigzag(b: &mut Bencher) {
+        b.iter(|| 27424i16.zigzag())
+    }
+
+    #[bench]
+    fn bench_u16_zigzag(b: &mut Bencher) {
+        b.iter(|| 22447u16.zigzag())
+    }
+
+    #[bench]
+    fn bench_i32_zigzag(b: &mut Bencher) {
+        b.iter(|| 22472745i32.zigzag())
+    }
+
+    #[bench]
+    fn bench_u32_zigzag(b: &mut Bencher) {
+        b.iter(|| 22376257u32.zigzag())
+    }
+
+    #[bench]
+    fn bench_i64_zigzag(b: &mut Bencher) {
+        b.iter(|| 234678386538365i64.zigzag())
+    }
+
+    #[bench]
+    fn bench_u64_zigzag(b: &mut Bencher) {
+        b.iter(|| 254724572473468u64.zigzag())
+    }
+
+}
