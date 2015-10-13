@@ -14,8 +14,10 @@ extern crate io_operations;
 #[cfg(feature = "io-operations")]
 mod iooperations;
 
-//#[cfg(feature = "io-operations")]
-//pub use io-operations;
+#[cfg(feature = "io-operations")]
+pub use iooperations::VarintReader as VarintReader;
+#[cfg(feature = "io-operations")]
+pub use iooperations::VarintWriter as VarintWriter;
 
 /// The maximum number of bytes used by a 32-bit Varint
 pub const VARINT_32_MAX_BYTES: usize = 5;
