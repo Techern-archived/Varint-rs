@@ -22,7 +22,7 @@ script:
   travis-cargo --only stable doc -- --features io-operations
 after_success:
 - travis-cargo --only stable doc-upload
-- travis-cargo coveralls --no-sudo
+- travis-cargo coveralls --no-sudo -- --features io-operations #You cheeky bugger
 env:
   global:
   - matrix:
