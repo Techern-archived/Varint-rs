@@ -1,3 +1,5 @@
+//! Integration with the IoOperations library
+
 use bit_utils::BitInformation;
 
 use io_operations::reader::Reader;
@@ -5,6 +7,7 @@ use io_operations::writer::Writer;
 
 use std::io::Error;
 
+/// Extends the IoOperations Reader trait to provide functions to read (currently only 32-bit) Variable-Length Integers
 pub trait VarintReader : Reader {
 
     /// Reads a signed 32-bit Varint from this VarintReader
@@ -57,6 +60,7 @@ pub trait VarintReader : Reader {
 
 }
 
+/// Extends the IoOperations Writer to provide functions for writing (currently only 32-bit) variable-length integers
 pub trait VarintWriter : Writer {
 
     /// Writes a signed varint 32 to this VarintWriter
