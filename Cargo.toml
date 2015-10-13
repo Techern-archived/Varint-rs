@@ -12,7 +12,8 @@ license = "MIT"
 
 [dependencies]
 bit_utils = "0.1.0"
-io_operations = "0.2.0" #TODO: Feature flag this in 2.0, and add support for other stream utilities
+io_operations = { version = "0.2.0", optional = true } 
 
 [features]
 nightly = []
+io-operations = [ "io_operations" ]

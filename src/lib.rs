@@ -2,13 +2,20 @@
 
 #![cfg_attr(feature = "nightly", feature(test))]
 
-//extern crate bit_utils;
-
-//use bit_utils::BitInformation;
+extern crate bit_utils;
 
 mod zigzag;
 
 pub use zigzag::ZigZag;
+
+#[cfg(feature = "io-operations")]
+extern crate io_operations;
+
+#[cfg(feature = "io-operations")]
+mod iooperations;
+
+//#[cfg(feature = "io-operations")]
+//pub use io-operations;
 
 /// The maximum number of bytes used by a 32-bit Varint
 pub const VARINT_32_MAX_BYTES: usize = 5;
