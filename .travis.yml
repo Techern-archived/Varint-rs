@@ -16,10 +16,10 @@ before_script:
   export PATH=$HOME/.local/bin:$PATH
 script:
 - |
-  travis-cargo build --features io-operations &&
-  travis-cargo test --features io-operations &&
-  travis-cargo bench --features io-operations &&
-  travis-cargo --only stable doc --features io-operations
+  travis-cargo build -- --features io-operations &&
+  travis-cargo test -- --features io-operations &&
+  travis-cargo bench -- --features io-operations &&
+  travis-cargo --only stable doc -- --features io-operations
 after_success:
 - travis-cargo --only stable doc-upload
 - travis-cargo coveralls --no-sudo
