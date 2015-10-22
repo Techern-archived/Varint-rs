@@ -17,11 +17,11 @@
 
 ###Examples
 
-```
-    extern crate varint;
-    use varint::{ VarintRead, VarintWrite }; //Using IO-Operations? Replace with VarintReader and VarintWriter, the functions are the same
+```rust
+extern crate varint;
+use varint::{ VarintRead, VarintWrite }; //Using IO-Operations? Replace with VarintReader and VarintWriter, the functions are the same
 
-    use std::io::Cursor; //Currently supports Cursor<Vec<u8>> and TcpStream, but should be okay to implement in any Read/Write trait
+use std::io::Cursor; //Currently supports Cursor<Vec<u8>> and TcpStream, but should be okay to implement in any Read/Write trait
 
-    panic!("Not implemented yet, go away");
+panic!("Not implemented yet, go away");
 ```
