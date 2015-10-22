@@ -8,6 +8,11 @@ mod zigzag;
 
 pub use zigzag::ZigZag;
 
+mod rawio;
+
+pub use rawio::VarintRead as VarintRead;
+pub use rawio::VarintWrite as VarintWrite;
+
 #[cfg(feature = "io-operations")]
 extern crate io_operations;
 

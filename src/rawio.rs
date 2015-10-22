@@ -2,15 +2,12 @@
 
 use bit_utils::BitInformation;
 
-use io_operations::reader::Reader;
-use io_operations::writer::Writer;
+use std::io::{ Error, Read, Write, ErrorKind };
 
-use std::io::Error;
+/// Extends the I/O Read trait to provide functions to read (currently only 32-bit) Variable-Length Integers
+pub trait VarintRead : Read {
 
-/// Extends the IoOperations Reader trait to provide functions to read (currently only 32-bit) Variable-Length Integers
-pub trait VarintReader : Reader {
-
-    /// Reads a signed 32-bit Varint from this VarintReader
+    /// Reads a signed 32-bit Varint from this VarintRead
     fn read_signed_varint_32(&mut self) -> Result<i32, Error> {
 
         use zigzag::ZigZag;
@@ -35,23 +32,33 @@ pub trait VarintReader : Reader {
         // The decoded value
         let mut decoded_value: u32 = 0;
 
+        let mut raw_buffer = vec![0u8; 1];
+
+        let mut next_byte: u8 = 0;
+
         loop {
 
-            match self.read_unsigned_byte() {
+            match self.read(&mut raw_buffer) {
+
+                Ok(count) => {
+                    if count == 1 {
+                        next_byte = raw_buffer[0];
+                    } else {
+                        return Err(Error::new(ErrorKind::Other, "Could not read one byte (end of stream?)"));
+                    }
+                },
                 Err(error) => {
                     return Err(error);
                 }
 
-                Ok(byte_value) => {
-                    decoded_value |= ((byte_value & 0b01111111) as u32) << shift_amount;
+            }
 
-                    // See if we're supposed to keep reading
-                    if byte_value.has_most_signifigant_bit() {
-                        shift_amount += 7;
-                    } else {
-                        return Ok(decoded_value);
-                    }
-                }
+            decoded_value |= ((next_byte & 0b01111111) as u32) << shift_amount;
+            // See if we're supposed to keep reading
+            if next_byte.has_most_signifigant_bit() {
+                shift_amount += 7;
+            } else {
+                return Ok(decoded_value);
             }
 
         }
@@ -60,10 +67,10 @@ pub trait VarintReader : Reader {
 
 }
 
-/// Extends the IoOperations Writer to provide functions for writing (currently only 32-bit) variable-length integers
-pub trait VarintWriter : Writer {
+/// Extends the I/O Write trait to provide functions for writing (currently only 32-bit) variable-length integers
+pub trait VarintWrite : Write {
 
-    /// Writes a signed varint 32 to this VarintWriter
+    /// Writes a signed varint 32 to this VarintWrite
     fn write_signed_varint_32(&mut self, value: i32) -> Result<(), Error> {
 
         use zigzag::ZigZag;
@@ -71,13 +78,18 @@ pub trait VarintWriter : Writer {
         self.write_unsigned_varint_32(value.zigzag())
     }
 
-    /// Writes an unsigned 32-bit Varint to this VarintWriter
+    /// Writes an unsigned 32-bit Varint to this VarintWrite
     fn write_unsigned_varint_32(&mut self, value: u32) -> Result<(), Error> {
 
         let mut _value: u32 = value;
 
         if value == 0 {
-            return self.write_unsigned_byte(0)
+            let raw_buffer = vec![0];
+
+            // Reassign to a buffer of raw u8s
+            let raw_buffer: &[u8] = &raw_buffer[..];
+
+            return self.write_all(raw_buffer);
         } else {
 
             while _value >= 0b10000000 {
@@ -86,7 +98,12 @@ pub trait VarintWriter : Writer {
 
                 _value = _value >> 7;
 
-                let temp = self.write_unsigned_byte(next_byte);
+                let raw_buffer = vec![next_byte];
+
+                // Reassign to a buffer of raw u8s
+                let raw_buffer: &[u8] = &raw_buffer[..];
+
+                let temp = self.write_all(raw_buffer);
 
                 if temp.is_err() {
                     return temp;
@@ -94,23 +111,28 @@ pub trait VarintWriter : Writer {
 
             }
 
-            return self.write_unsigned_byte((_value & 0b01111111) as u8);
+            let raw_buffer = vec![(_value & 0b01111111) as u8];
+
+            // Reassign to a buffer of raw u8s
+            let raw_buffer: &[u8] = &raw_buffer[..];
+
+            return self.write_all(raw_buffer);
 
         }
 
     }
 }
 
-impl VarintReader for ::std::io::Cursor<Vec<u8>> { }
-impl VarintReader for ::std::net::TcpStream { }
-impl VarintWriter for ::std::io::Cursor<Vec<u8>> { }
-impl VarintWriter for ::std::net::TcpStream { }
+impl VarintRead for ::std::io::Cursor<Vec<u8>> { }
+impl VarintRead for ::std::net::TcpStream { }
+impl VarintWrite for ::std::io::Cursor<Vec<u8>> { }
+impl VarintWrite for ::std::net::TcpStream { }
 
 
 #[cfg(test)]
 mod test {
 
-    use super::{ VarintReader, VarintWriter };
+    use super::{ VarintRead, VarintWrite };
 
     use std::io::Cursor;
 
