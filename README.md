@@ -23,5 +23,13 @@ use varint::{ VarintRead, VarintWrite }; //Using IO-Operations? Replace with Var
 
 use std::io::Cursor; //Currently supports Cursor<Vec<u8>> and TcpStream, but should be okay to implement in any Read/Write trait
 
-panic!("Not implemented yet, go away");
+let mut vector = Cursor::new(vec![0u8; 0]);
+
+assert!(vector.write_signed_varint_32(2346784).is_ok()); //You can check this however you like. Try! could work. I'll check it out in Netherrack and update this by 1.0
+
+//Do whatever you need to do.
+vector.set_position(0); //If you're using a TcpStream, you'd probably switch sides and into a different codebase. This is just a quick example before I fall asleep :)
+
+assert_eq!(2346784, vector.read_signed_varint_32().unwrap()); //You could also use try! here. Again, I'll test it in a real world project and update later
+
 ```
