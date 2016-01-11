@@ -8,7 +8,7 @@ repository = "https://github.com/Techern/Varint-rs"
 documentation = "http://techern.github.io/Varint-rs"
 readme = "README.md"
 keywords = ["Protobuf", "Google", "Varint"]
-license = "MIT"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 bit_utils = "0.1.0"
