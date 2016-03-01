@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["VarintRead","Extends the I/O Read trait to provide functions to read (currently only 32-bit) Variable-Length Integers"],["VarintWrite","Extends the I/O Write trait to provide functions for writing (currently only 32-bit) variable-length integers"]]});
