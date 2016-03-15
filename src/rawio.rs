@@ -123,10 +123,9 @@ pub trait VarintWrite : Write {
     }
 }
 
-impl VarintRead for ::std::io::Cursor<Vec<u8>> { }
-impl VarintRead for ::std::net::TcpStream { }
-impl VarintWrite for ::std::io::Cursor<Vec<u8>> { }
-impl VarintWrite for ::std::net::TcpStream { }
+impl<T> VarintRead for T where T: Read { }
+
+impl<T> VarintWrite for T where T: Write { }
 
 
 #[cfg(test)]
@@ -153,6 +152,13 @@ mod test {
         assert_eq!(2111111111, vector.read_unsigned_varint_32().unwrap());
         assert_eq!(3463465, vector.read_unsigned_varint_32().unwrap());
 
+        // test reading varints for slices
+        let v = vector.into_inner();
+        let mut sl = &v[..];
+        assert_eq!(15, sl.read_unsigned_varint_32().unwrap());
+        assert_eq!(0, sl.read_unsigned_varint_32().unwrap());
+        assert_eq!(2111111111, sl.read_unsigned_varint_32().unwrap());
+        assert_eq!(3463465, sl.read_unsigned_varint_32().unwrap());
 
     }
 
