@@ -27,5 +27,5 @@ pub use iooperations::VarintWriter as VarintWriter;
 /// The maximum number of bytes used by a 32-bit Varint
 pub const VARINT_32_MAX_BYTES: usize = 5;
 
-/// The maximum number of bytes used by a 32-bit Varint
+/// The maximum number of bytes used by a 64-bit Varint
 pub const VARINT_64_MAX_BYTES: usize = 10;
